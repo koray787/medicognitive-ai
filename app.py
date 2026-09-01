@@ -1646,7 +1646,7 @@ with tab1:
 
 
 # =========================================================
-# TAB 2 — TRENDS (FIXED PLOTLY LAYOUT)
+# TAB 2 — TRENDS (COMPATIBLE PLOTLY LAYOUT)
 # =========================================================
 
 with tab2:
@@ -1695,7 +1695,7 @@ with tab2:
         )
     )
 
-    # Temperature (على المحور الأيمن yaxis2)
+    # Temperature (y-axis 2)
     fig.add_trace(
         go.Scatter(
             x=dates_str,
@@ -1708,6 +1708,7 @@ with tab2:
         )
     )
 
+    # Layout update fully safe for Python 3.14 / Plotly 5+
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(10,10,10,0.5)",
@@ -1718,17 +1719,15 @@ with tab2:
             showgrid=True
         ),
         yaxis=dict(
-            title="SpO₂ / Heart Rate",
+            title=dict(text="SpO₂ / Heart Rate", font=dict(color="#D4AF37")),
             gridcolor="rgba(212,175,55,0.1)",
-            titlefont=dict(color="#D4AF37"),
             tickfont=dict(color="#D4AF37")
         ),
         yaxis2=dict(
-            title="Temp (°C)",
+            title=dict(text="Temp (°C)", font=dict(color="#E7C95C")),
             overlaying="y",
             side="right",
             gridcolor="rgba(212,175,55,0.05)",
-            titlefont=dict(color="#E7C95C"),
             tickfont=dict(color="#E7C95C")
         )
     )
