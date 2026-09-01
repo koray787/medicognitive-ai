@@ -1646,7 +1646,7 @@ with tab1:
 
 
 # =========================================================
-# TAB 2 — TRENDS
+# TAB 2 — TRENDS (FIXED PLOTLY LAYOUT)
 # =========================================================
 
 with tab2:
@@ -1665,54 +1665,37 @@ with tab2:
         for d in dates
     ]
 
-    mock_spo2 = [
-        98,
-        97,
-        96,
-        94,
-        93,
-        92,
-        spo2
-    ]
-
-    mock_temp = [
-        36.6,
-        36.9,
-        37.2,
-        37.8,
-        38.2,
-        38.6,
-        temp
-    ]
-
-    mock_hr = [
-        70,
-        75,
-        82,
-        90,
-        98,
-        105,
-        hr
-    ]
+    mock_spo2 = [98, 97, 96, 94, 93, 92, spo2]
+    mock_temp = [36.6, 36.9, 37.2, 37.8, 38.2, 38.6, temp]
+    mock_hr = [70, 75, 82, 90, 98, 105, hr]
 
     fig = go.Figure()
 
+    # SpO2
     fig.add_trace(
         go.Scatter(
             x=dates_str,
             y=mock_spo2,
             mode="lines+markers",
-            name="SpO₂",
-            line=dict(
-                color="#D4AF37",
-                width=4
-            ),
-            marker=dict(
-                size=8
-            )
+            name="SpO₂ (%)",
+            line=dict(color="#D4AF37", width=4),
+            marker=dict(size=8)
         )
     )
 
+    # Heart Rate
+    fig.add_trace(
+        go.Scatter(
+            x=dates_str,
+            y=mock_hr,
+            mode="lines+markers",
+            name="Heart Rate (bpm)",
+            line=dict(color="#AA7C11", width=2, dash="dot"),
+            marker=dict(size=6)
+        )
+    )
+
+    # Temperature (على المحور الأيمن yaxis2)
     fig.add_trace(
         go.Scatter(
             x=dates_str,
@@ -1720,32 +1703,8 @@ with tab2:
             mode="lines+markers",
             name="Temperature (°C)",
             yaxis="y2",
-            line=dict(
-                color="#E7C95C",
-                width=3,
-                dash="dash"
-            ),
-            marker=dict(
-                size=6
-            )
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=dates_str,
-            y=mock_hr,
-            mode="lines+markers",
-            name="Heart Rate (bpm)",
-            yaxis="y3",
-            line=dict(
-                color="#AA7C11",
-                width=2,
-                dash="dot"
-            ),
-            marker=dict(
-                size=6
-            )
+            line=dict(color="#E7C95C", width=3, dash="dash"),
+            marker=dict(size=6)
         )
     )
 
@@ -1759,7 +1718,7 @@ with tab2:
             showgrid=True
         ),
         yaxis=dict(
-            title="SpO₂ (%)",
+            title="SpO₂ / Heart Rate",
             gridcolor="rgba(212,175,55,0.1)",
             titlefont=dict(color="#D4AF37"),
             tickfont=dict(color="#D4AF37")
@@ -1770,15 +1729,6 @@ with tab2:
             side="right",
             titlefont=dict(color="#E7C95C"),
             tickfont=dict(color="#E7C95C"),
-            showgrid=False
-        ),
-        yaxis3=dict(
-            title="HR (bpm)",
-            overlaying="y",
-            side="right",
-            position=0.95,
-            titlefont=dict(color="#AA7C11"),
-            tickfont=dict(color="#AA7C11"),
             showgrid=False
         ),
         legend=dict(
