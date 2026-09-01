@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from clinical_model import clinical_risk_assessment
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from PIL import Image
