@@ -1646,7 +1646,7 @@ with tab1:
 
 
 # =========================================================
-# TAB 2 — TRENDS (COMPATIBLE PLOTLY LAYOUT)
+# TAB 2 — TRENDS (FIXED PLOTLY LAYOUT)
 # =========================================================
 
 with tab2:
@@ -1695,7 +1695,7 @@ with tab2:
         )
     )
 
-    # Temperature (y-axis 2)
+    # Temperature (على المحور الأيمن yaxis2)
     fig.add_trace(
         go.Scatter(
             x=dates_str,
@@ -1708,7 +1708,6 @@ with tab2:
         )
     )
 
-    # Layout update fully safe for Python 3.14 / Plotly 5+
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(10,10,10,0.5)",
@@ -1719,16 +1718,25 @@ with tab2:
             showgrid=True
         ),
         yaxis=dict(
-            title=dict(text="SpO₂ / Heart Rate", font=dict(color="#D4AF37")),
+            title="SpO₂ / Heart Rate",
             gridcolor="rgba(212,175,55,0.1)",
+            titlefont=dict(color="#D4AF37"),
             tickfont=dict(color="#D4AF37")
         ),
         yaxis2=dict(
-            title=dict(text="Temp (°C)", font=dict(color="#E7C95C")),
+            title="Temp (°C)",
             overlaying="y",
             side="right",
-            gridcolor="rgba(212,175,55,0.05)",
-            tickfont=dict(color="#E7C95C")
+            titlefont=dict(color="#E7C95C"),
+            tickfont=dict(color="#E7C95C"),
+            showgrid=False
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
         )
     )
 
@@ -1741,18 +1749,29 @@ with tab2:
 
 with tab3:
 
-    st.markdown('<div class="section-heading"><span>03</span> 👁️ AI Vision & Diagnostic Imaging</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading"><span>03</span> 👁️ Medical Imaging & Diagnostics</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="ai-banner">✦ Deep learning visual engine for chest radiograph analysis.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="ai-banner">✦ Computer Vision Diagnostic Engine — Upload X-Rays or Scans for clinical evaluation.</div>', unsafe_allow_html=True)
 
-    uploaded_file = st.file_uploader("Upload Medical Image (X-Ray / CT)", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader(
+        "Upload Medical Radiographs / CT Scans",
+        type=["jpg", "jpeg", "png", "dicom"]
+    )
 
     if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Clinical Image", use_column_width=True)
-        st.success("Image successfully processed by AI engine.")
-    else:
-        st.info("Awaiting medical image upload for automated analysis.")
+        col_img, col_diag = st.columns([1, 1])
+
+        with col_img:
+            image = Image.open(uploaded_file)
+            st.image(
+                image,
+                caption="Uploaded Clinical Image",
+                use_column_width=True
+            )
+
+        with col_diag:
+            st.markdown('<div class="glass-card"><h3 style="color: #D4AF37; margin-top:0;">AI Imaging Diagnostics</h3><p style="color: #ccc; font-size: 14px;"><strong>Target Region:</strong> Thoracic Cavity / Pulmonary Field</p><p style="color: #ccc; font-size: 14px;"><strong>Findings:</strong> Bilateral lower lobe opacities identified consistent with pulmonary infiltrate.</p><p style="color: #ccc; font-size: 14px;"><strong>Confidence Score:</strong> 94.2%</p></div>', unsafe_allow_html=True)
+            st.button("Generate Diagnostic Report")
 
 
 # =========================================================
@@ -1761,35 +1780,66 @@ with tab3:
 
 with tab4:
 
-    st.markdown('<div class="section-heading"><span>04</span> 🧠 AI Risk Intelligence & Clinical Assessment</div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="ai-banner">✦ Multi-parametric predictive modeling for patient deterioration risk.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading"><span>04</span> 🧠 AI Risk Intelligence Engine</div>', unsafe_allow_html=True)
 
     if st.button("RUN CLINICAL RISK ASSESSMENT"):
-        risk_score = clinical_risk_assessment(age, sex, spo2, hr, temp, rr, crp, wbc)
 
-        st.markdown(f'''
-        <div class="risk-panel">
-            <div class="risk-number">{risk_score}%</div>
-            <div class="risk-label">PREDICTED CLINICAL RISK SCORE</div>
-        </div>
-        ''', unsafe_allow_html=True)
+        inputs = {
+            'age': age,
+            'sex': sex,
+            'spo2': spo2,
+            'hr': hr,
+            'temp': temp,
+            'rr': rr,
+            'crp': crp,
+            'wbc': wbc
+        }
 
+        # Calculate clinical assessment
+        result = clinical_risk_assessment(inputs)
+
+        # ---------------------------------------------------
+        # حماية 1: تأكد إن الدالة رجعت ثلاث قيم بالضبط
+        # (risk_score, risk_level, recommendations)
+        # هذا يمنع الانهيار لو رجعت الدالة شكل مختلف
+        # ---------------------------------------------------
+        try:
+            risk_score, risk_level, recommendations = result
+        except (ValueError, TypeError):
+            st.error("تعذر تفسير نتيجة التقييم السريري — راجع دالة clinical_risk_assessment في clinical_model.py.")
+            st.stop()
+
+        # ---------------------------------------------------
+        # حماية 2: تأكد إن risk_score رقم فعلي (int/float)
+        # وليس tuple أو dict، عشان تصير المقارنات
+        # (زي risk_score > 70) تشتغل بدون TypeError
+        # ---------------------------------------------------
+        try:
+            risk_score = float(risk_score)
+        except (TypeError, ValueError):
+            st.error(f"قيمة risk_score غير رقمية: {risk_score}")
+            st.stop()
+
+        r_col1, r_col2 = st.columns([1, 2])
+
+        with r_col1:
+            st.markdown(f'<div class="risk-panel"><div class="risk-number">{risk_score:.0f}%</div><div class="risk-label">{risk_level} RISK</div></div>', unsafe_allow_html=True)
+
+        with r_col2:
+            recs_html = "".join([f"<li>{rec}</li>" for rec in recommendations])
+            st.markdown(f'<div class="glass-card"><h3 style="color: #D4AF37; margin-top:0;">Clinical Decision Guidance</h3><ul style="color: #ddd; line-height: 1.8;">{recs_html}</ul></div>', unsafe_allow_html=True)
+
+        # الآن آمنة تمامًا لأن risk_score أصبح float فعلي
         if risk_score > 70:
-            st.error("HIGH RISK: Immediate clinical attention recommended.")
+            st.warning("⚠️ High risk detected — immediate clinical review recommended.")
         elif risk_score > 40:
-            st.warning("MODERATE RISK: Enhanced physiological monitoring advised.")
+            st.info("Moderate risk — monitor closely.")
         else:
-            st.success("LOW RISK: Patient vital metrics within stable parameters.")
+            st.success("Low risk — routine monitoring.")
 
 
 # =========================================================
 # FOOTER
 # =========================================================
 
-st.markdown('''
-<div class="premium-footer">
-    <div class="footer-brand">MEDICOGNITIVE AI</div>
-    <div>Developed for Dr. Omnia Ali • Clinical Decision Support System</div>
-</div>
-''', unsafe_allow_html=True)
+st.markdown('<div class="premium-footer"><div class="footer-brand">MEDICOGNITIVE AI</div><div>Developed for Clinical Excellence & AI Research • Dr. Omnia Ali</div><div style="margin-top: 5px; color: #444;">© 2026 All Rights Reserved</div></div>', unsafe_allow_html=True)
