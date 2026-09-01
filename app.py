@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,7 +5,107 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from PIL import Image
 import io
-import math
+
+# =========================================================
+# OPTIONAL CLINICAL MODEL
+# =========================================================
+
+try:
+    from clinical_model import clinical_risk_assessment
+    CLINICAL_MODEL_AVAILABLE = True
+except Exception:
+    CLINICAL_MODEL_AVAILABLE = False
+
+    def clinical_risk_assessment(inputs):
+        """
+        Safe fallback clinical scoring.
+        This is a demonstration score only and is NOT a medical diagnosis.
+        """
+
+        score = 0.0
+
+        age = float(inputs.get("age", 0))
+        spo2 = float(inputs.get("spo2", 100))
+        hr = float(inputs.get("hr", 70))
+        temp = float(inputs.get("temp", 36.5))
+        rr = float(inputs.get("rr", 16))
+        crp = float(inputs.get("crp", 0))
+        wbc = float(inputs.get("wbc", 0))
+
+        if age >= 65:
+            score += 10
+        elif age >= 50:
+            score += 5
+
+        if spo2 < 90:
+            score += 30
+        elif spo2 < 94:
+            score += 20
+        elif spo2 < 96:
+            score += 8
+
+        if hr >= 130:
+            score += 20
+        elif hr >= 110:
+            score += 12
+        elif hr >= 100:
+            score += 6
+
+        if temp >= 39.0:
+            score += 15
+        elif temp >= 38.0:
+            score += 10
+        elif temp >= 37.5:
+            score += 5
+
+        if rr >= 30:
+            score += 20
+        elif rr >= 24:
+            score += 12
+        elif rr >= 20:
+            score += 6
+
+        if crp >= 100:
+            score += 15
+        elif crp >= 50:
+            score += 10
+        elif crp >= 20:
+            score += 5
+
+        if wbc >= 20:
+            score += 15
+        elif wbc >= 15:
+            score += 10
+        elif wbc >= 12:
+            score += 5
+
+        score = min(100, max(0, round(score)))
+
+        if score >= 70:
+            level = "HIGH"
+            recommendations = [
+                "Urgent clinical review is recommended.",
+                "Reassess oxygenation and respiratory status.",
+                "Correlate findings with the complete clinical picture.",
+                "Consider escalation according to local clinical protocols."
+            ]
+        elif score >= 40:
+            level = "MODERATE"
+            recommendations = [
+                "Close clinical monitoring is recommended.",
+                "Repeat vital signs as clinically appropriate.",
+                "Correlate laboratory findings with symptoms and examination.",
+                "Consider further medical evaluation if deterioration occurs."
+            ]
+        else:
+            level = "LOW"
+            recommendations = [
+                "Continue appropriate clinical monitoring.",
+                "Interpret the result together with clinical examination.",
+                "Repeat assessment if symptoms change or worsen."
+            ]
+
+        return score, level, recommendations
 
 
 # =========================================================
@@ -19,236 +118,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
-
-# =========================================================
-# CLINICAL RISK ENGINE
-# SELF-CONTAINED — NO EXTERNAL MODEL REQUIRED
-# =========================================================
-
-def clinical_risk_assessment(inputs):
-    """
-    Educational/demo clinical risk scoring engine.
-    This is NOT a medical diagnosis and must not replace
-    professional clinical judgment.
-    """
-
-    age = float(inputs.get("age", 0))
-    sex = str(inputs.get("sex", "Male"))
-    spo2 = float(inputs.get("spo2", 98))
-    hr = float(inputs.get("hr", 75))
-    temp = float(inputs.get("temp", 36.7))
-    rr = float(inputs.get("rr", 16))
-    crp = float(inputs.get("crp", 5))
-    wbc = float(inputs.get("wbc", 7))
-
-    score = 0.0
-    recommendations = []
-
-    # -----------------------------------------------------
-    # Age
-    # -----------------------------------------------------
-
-    if age >= 80:
-        score += 12
-    elif age >= 70:
-        score += 9
-    elif age >= 60:
-        score += 6
-    elif age >= 50:
-        score += 3
-
-    # -----------------------------------------------------
-    # SpO2
-    # -----------------------------------------------------
-
-    if spo2 < 85:
-        score += 30
-        recommendations.append(
-            "Very low oxygen saturation detected — immediate clinical evaluation is recommended."
-        )
-    elif spo2 < 90:
-        score += 25
-        recommendations.append(
-            "Low SpO₂ detected — prompt clinical assessment is recommended."
-        )
-    elif spo2 < 94:
-        score += 15
-        recommendations.append(
-            "SpO₂ is below the usual reference range — reassess oxygenation clinically."
-        )
-    elif spo2 < 96:
-        score += 6
-
-    # -----------------------------------------------------
-    # Heart Rate
-    # -----------------------------------------------------
-
-    if hr >= 140:
-        score += 18
-        recommendations.append(
-            "Marked tachycardia detected — correlate with symptoms and clinical examination."
-        )
-    elif hr >= 120:
-        score += 13
-        recommendations.append(
-            "Elevated heart rate detected — monitor and investigate possible underlying causes."
-        )
-    elif hr >= 100:
-        score += 7
-    elif hr < 50:
-        score += 8
-        recommendations.append(
-            "Low heart rate detected — interpret according to symptoms, medications, and baseline."
-        )
-
-    # -----------------------------------------------------
-    # Temperature
-    # -----------------------------------------------------
-
-    if temp >= 40:
-        score += 16
-        recommendations.append(
-            "Marked hyperthermia detected — urgent clinical assessment is recommended."
-        )
-    elif temp >= 39:
-        score += 12
-        recommendations.append(
-            "High temperature detected — evaluate for infection or other causes."
-        )
-    elif temp >= 38:
-        score += 8
-        recommendations.append(
-            "Fever-range temperature detected — correlate with clinical findings."
-        )
-    elif temp < 35:
-        score += 12
-        recommendations.append(
-            "Low body temperature detected — clinical correlation is recommended."
-        )
-
-    # -----------------------------------------------------
-    # Respiratory Rate
-    # -----------------------------------------------------
-
-    if rr >= 30:
-        score += 20
-        recommendations.append(
-            "Marked tachypnea detected — assess respiratory status promptly."
-        )
-    elif rr >= 24:
-        score += 13
-        recommendations.append(
-            "Elevated respiratory rate detected — reassess respiratory function."
-        )
-    elif rr >= 20:
-        score += 7
-    elif rr < 10:
-        score += 8
-        recommendations.append(
-            "Low respiratory rate detected — assess respiratory status clinically."
-        )
-
-    # -----------------------------------------------------
-    # CRP
-    # -----------------------------------------------------
-
-    if crp >= 150:
-        score += 15
-        recommendations.append(
-            "Markedly elevated CRP detected — investigate significant inflammatory processes."
-        )
-    elif crp >= 100:
-        score += 12
-        recommendations.append(
-            "High CRP detected — correlate with infection and inflammatory findings."
-        )
-    elif crp >= 50:
-        score += 8
-    elif crp >= 20:
-        score += 4
-
-    # -----------------------------------------------------
-    # WBC
-    # -----------------------------------------------------
-
-    if wbc >= 20:
-        score += 12
-        recommendations.append(
-            "Marked leukocytosis detected — correlate with infection, inflammation, and other causes."
-        )
-    elif wbc >= 15:
-        score += 8
-    elif wbc >= 12:
-        score += 5
-    elif wbc < 3:
-        score += 10
-        recommendations.append(
-            "Low WBC count detected — clinical correlation is recommended."
-        )
-
-    # -----------------------------------------------------
-    # Combined physiological deterioration pattern
-    # -----------------------------------------------------
-
-    if spo2 < 94 and rr >= 24:
-        score += 8
-        recommendations.append(
-            "Combined oxygenation and respiratory-rate abnormalities detected."
-        )
-
-    if temp >= 38 and hr >= 100:
-        score += 6
-        recommendations.append(
-            "Fever with elevated heart rate detected — assess for systemic illness."
-        )
-
-    if crp >= 50 and wbc >= 12:
-        score += 5
-        recommendations.append(
-            "Inflammatory markers are elevated together — correlate with the clinical picture."
-        )
-
-    # -----------------------------------------------------
-    # Sex adjustment kept minimal
-    # -----------------------------------------------------
-
-    if sex.lower() == "female" and age >= 65:
-        score += 1
-
-    # -----------------------------------------------------
-    # Normalize score
-    # -----------------------------------------------------
-
-    score = int(round(max(0, min(100, score))))
-
-    # -----------------------------------------------------
-    # Risk category
-    # -----------------------------------------------------
-
-    if score >= 70:
-        risk_level = "HIGH"
-    elif score >= 40:
-        risk_level = "MODERATE"
-    elif score >= 20:
-        risk_level = "LOW-MODERATE"
-    else:
-        risk_level = "LOW"
-
-    # -----------------------------------------------------
-    # Default recommendations
-    # -----------------------------------------------------
-
-    if not recommendations:
-        recommendations.append(
-            "Current entered parameters do not indicate a major abnormality in this demonstration model."
-        )
-
-    recommendations.append(
-        "This score is an educational decision-support demonstration and is not a diagnosis."
-    )
-
-    return score, risk_level, recommendations
 
 
 # =========================================================
@@ -266,6 +135,7 @@ st.markdown(
     --gold-light: #FFF099;
     --gold-dark: #AA7C11;
     --gold-soft: #E7C95C;
+
     --black: #050505;
     --black-2: #090909;
     --card: rgba(20, 20, 20, 0.72);
@@ -280,6 +150,10 @@ st.markdown(
             #AA7C11
         );
 }
+
+/* =========================================================
+   GLOBAL
+========================================================= */
 
 html {
     scroll-behavior: smooth;
@@ -319,6 +193,10 @@ body,
     min-height: 100vh;
 }
 
+/* =========================================================
+   CONTAINER
+========================================================= */
+
 .main .block-container {
     max-width: 1550px;
     padding-top: 2rem;
@@ -326,6 +204,10 @@ body,
     padding-left: 2.5rem;
     padding-right: 2.5rem;
 }
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
 
 ::-webkit-scrollbar {
     width: 8px;
@@ -336,14 +218,18 @@ body,
 }
 
 ::-webkit-scrollbar-thumb {
-    background:
-        linear-gradient(
-            180deg,
-            #D4AF37,
-            #80600E
-        );
+    background: linear-gradient(
+        180deg,
+        #D4AF37,
+        #80600E
+    );
+
     border-radius: 20px;
 }
+
+/* =========================================================
+   BACKGROUND ORBS
+========================================================= */
 
 .gold-background {
     position: fixed;
@@ -388,15 +274,22 @@ body,
     }
 }
 
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
 .luxury-nav {
     position: relative;
     z-index: 10;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 25px;
+
     padding: 18px 28px;
     margin-bottom: 28px;
+
     border-radius: 22px;
 
     background:
@@ -433,41 +326,6 @@ body,
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
-    position: relative;
-}
-
-.luxury-logo::after {
-    content: "";
-    position: absolute;
-    left: -100%;
-    top: 0;
-    width: 100%;
-    height: 100%;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255,255,255,0.8),
-            transparent
-        );
-
-    animation: logoShine 4s infinite;
-}
-
-@keyframes logoShine {
-    0% {
-        left: -100%;
-    }
-
-    20% {
-        left: 100%;
-    }
-
-    100% {
-        left: 100%;
-    }
 }
 
 .luxury-nav-links {
@@ -480,7 +338,6 @@ body,
 
 .luxury-nav-links span {
     transition: 0.3s;
-    cursor: default;
 }
 
 .luxury-nav-links span:hover {
@@ -493,7 +350,14 @@ body,
 .vip-badge {
     padding: 9px 20px;
     border-radius: 30px;
-    background: var(--gold-gradient);
+
+    background:
+        linear-gradient(
+            135deg,
+            #D4AF37,
+            #AA7C11
+        );
+
     color: #050505;
     font-weight: 800;
     font-size: 13px;
@@ -502,6 +366,10 @@ body,
         0 0 25px
         rgba(212,175,55,0.25);
 }
+
+/* =========================================================
+   HERO
+========================================================= */
 
 .premium-hero {
     position: relative;
@@ -551,11 +419,15 @@ body,
 
 .premium-hero::before {
     content: "";
+
     position: absolute;
+
     width: 500px;
     height: 500px;
+
     top: -300px;
     right: -150px;
+
     border-radius: 50%;
 
     background:
@@ -584,6 +456,7 @@ body,
 .hero-medical-symbol {
     width: 86px;
     height: 86px;
+
     margin: 0 auto 22px;
 
     display: flex;
@@ -664,7 +537,8 @@ body,
     color: #fff;
 
     text-shadow:
-        0 0 20px rgba(212,175,55,0.14);
+        0 0 20px
+        rgba(212,175,55,0.14);
 }
 
 .doctor-title {
@@ -673,6 +547,10 @@ body,
     font-size: 12px;
     letter-spacing: 2px;
 }
+
+/* =========================================================
+   ECG
+========================================================= */
 
 .ecg-line {
     margin-top: 28px;
@@ -696,20 +574,25 @@ body,
         );
 }
 
+/* =========================================================
+   STATUS
+========================================================= */
+
 .system-status {
     display: inline-block;
+
     margin-top: 22px;
     padding: 10px 20px;
+
     border-radius: 30px;
 
     background:
         rgba(212,175,55,0.06);
 
-    border:
-        1px solid
-        rgba(212,175,55,0.22);
+    border: 1px solid rgba(212,175,55,0.22);
 
     color: #DCC36B;
+
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 1px;
@@ -717,9 +600,12 @@ body,
 
 .status-dot {
     display: inline-block;
+
     width: 8px;
     height: 8px;
+
     margin-left: 7px;
+
     border-radius: 50%;
 
     background: #D4AF37;
@@ -744,12 +630,17 @@ body,
     }
 }
 
+/* =========================================================
+   SECTION HEADINGS
+========================================================= */
+
 .section-heading {
     position: relative;
     z-index: 1;
 
     margin-top: 30px;
     margin-bottom: 18px;
+
     padding-bottom: 12px;
 
     border-bottom:
@@ -757,6 +648,7 @@ body,
         rgba(212,175,55,0.12);
 
     color: #fff;
+
     font-size: 24px;
     font-weight: 800;
 }
@@ -767,6 +659,10 @@ body,
     letter-spacing: 2px;
     margin-left: 10px;
 }
+
+/* =========================================================
+   FEATURE CARDS
+========================================================= */
 
 .feature-grid {
     display: grid;
@@ -783,6 +679,7 @@ body,
     min-height: 190px;
 
     border-radius: 20px;
+
     text-align: center;
 
     background:
@@ -806,7 +703,9 @@ body,
 
 .feature-card::before {
     content: "";
+
     position: absolute;
+
     top: 0;
     left: 0;
 
@@ -814,21 +713,30 @@ body,
     height: 2px;
 
     background:
-        var(--gold-gradient);
+        linear-gradient(
+            90deg,
+            #BF953F,
+            #FCF6BA,
+            #AA7C11
+        );
 
     opacity: 0;
+
     transition: .35s;
 }
 
 .feature-card:hover {
-    transform: translateY(-7px);
+    transform:
+        translateY(-7px);
 
     border-color:
         rgba(212,175,55,.5);
 
     box-shadow:
-        0 25px 60px rgba(0,0,0,.55),
-        0 0 30px rgba(212,175,55,.08);
+        0 25px 60px
+        rgba(0,0,0,.55),
+        0 0 30px
+        rgba(212,175,55,.08);
 }
 
 .feature-card:hover::before {
@@ -840,7 +748,12 @@ body,
     margin-bottom: 14px;
 
     background:
-        var(--gold-gradient);
+        linear-gradient(
+            135deg,
+            #BF953F,
+            #FCF6BA,
+            #AA7C11
+        );
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -858,6 +771,10 @@ body,
     font-size: 13px;
     line-height: 1.8;
 }
+
+/* =========================================================
+   AI BANNER
+========================================================= */
 
 .ai-banner {
     position: relative;
@@ -886,6 +803,10 @@ body,
         rgba(255,255,255,.03);
 }
 
+/* =========================================================
+   GLASS CARD
+========================================================= */
+
 .glass-card {
     background:
         linear-gradient(
@@ -899,7 +820,9 @@ body,
         rgba(212,175,55,.13);
 
     border-radius: 20px;
+
     padding: 23px;
+
     margin-bottom: 18px;
 
     box-shadow:
@@ -910,7 +833,8 @@ body,
 }
 
 .glass-card:hover {
-    transform: translateY(-3px);
+    transform:
+        translateY(-3px);
 
     border-color:
         rgba(212,175,55,.28);
@@ -920,11 +844,16 @@ body,
         rgba(0,0,0,.45);
 }
 
+/* =========================================================
+   VITAL CARDS
+========================================================= */
+
 .vital-card {
     position: relative;
     overflow: hidden;
 
     min-height: 145px;
+
     padding: 23px;
 
     border-radius: 21px;
@@ -999,6 +928,10 @@ body,
     font-size: 11px;
 }
 
+/* =========================================================
+   RISK PANEL
+========================================================= */
+
 .risk-panel {
     position: relative;
     overflow: hidden;
@@ -1006,6 +939,7 @@ body,
     padding: 38px 25px;
 
     border-radius: 27px;
+
     text-align: center;
 
     background:
@@ -1072,13 +1006,19 @@ body,
     margin-top: 12px;
 
     color: #80744D;
+
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 3px;
 }
 
+/* =========================================================
+   INPUTS
+========================================================= */
+
 .stTextInput input,
 .stNumberInput input {
+
     background:
         rgba(10,10,10,.92) !important;
 
@@ -1095,6 +1035,7 @@ body,
 
 .stTextInput input:focus,
 .stNumberInput input:focus {
+
     border-color:
         #D4AF37 !important;
 
@@ -1104,6 +1045,7 @@ body,
 }
 
 .stSelectbox > div > div {
+
     background:
         rgba(10,10,10,.92) !important;
 
@@ -1122,7 +1064,12 @@ label {
         600 !important;
 }
 
+/* =========================================================
+   BUTTONS
+========================================================= */
+
 .stButton > button {
+
     width: 100%;
     min-height: 48px;
 
@@ -1139,19 +1086,25 @@ label {
             #AA7C11
         );
 
-    color: #080808;
+    color:
+        #080808;
 
-    font-weight: 900;
-    letter-spacing: .5px;
+    font-weight:
+        900;
+
+    letter-spacing:
+        .5px;
 
     box-shadow:
         0 8px 25px
         rgba(212,175,55,.12);
 
-    transition: .25s;
+    transition:
+        .25s;
 }
 
 .stButton > button:hover {
+
     transform:
         translateY(-3px);
 
@@ -1166,8 +1119,14 @@ label {
         #000;
 }
 
+/* =========================================================
+   TABS
+========================================================= */
+
 .stTabs [data-baseweb="tab-list"] {
+
     gap: 7px;
+
     padding: 7px;
 
     border-radius: 18px;
@@ -1185,13 +1144,19 @@ label {
 }
 
 .stTabs [data-baseweb="tab"] {
+
     border-radius: 13px;
+
     padding: 12px 21px;
 
-    color: #756E5A;
-    font-weight: 800;
+    color:
+        #756E5A;
 
-    transition: .25s;
+    font-weight:
+        800;
+
+    transition:
+        .25s;
 }
 
 .stTabs [data-baseweb="tab"]:hover {
@@ -1200,6 +1165,7 @@ label {
 }
 
 .stTabs [aria-selected="true"] {
+
     background:
         linear-gradient(
             135deg,
@@ -1215,7 +1181,12 @@ label {
         rgba(212,175,55,.07);
 }
 
+/* =========================================================
+   ALERTS
+========================================================= */
+
 div[data-testid="stAlert"] {
+
     border-radius: 15px;
 
     border:
@@ -1226,7 +1197,12 @@ div[data-testid="stAlert"] {
         rgba(12,12,12,.85);
 }
 
+/* =========================================================
+   FILE UPLOADER
+========================================================= */
+
 [data-testid="stFileUploader"] {
+
     background:
         rgba(8,8,8,.72);
 
@@ -1241,7 +1217,12 @@ div[data-testid="stAlert"] {
         rgba(212,175,55,.25);
 }
 
+/* =========================================================
+   DATAFRAME
+========================================================= */
+
 [data-testid="stDataFrame"] {
+
     border-radius:
         16px;
 
@@ -1253,26 +1234,40 @@ div[data-testid="stAlert"] {
         rgba(212,175,55,.13);
 }
 
+/* =========================================================
+   FOOTER
+========================================================= */
+
 .premium-footer {
-    position: relative;
 
-    text-align: center;
+    position:
+        relative;
 
-    margin-top: 60px;
+    text-align:
+        center;
 
-    padding: 35px 20px;
+    margin-top:
+        60px;
+
+    padding:
+        35px 20px;
 
     border-top:
         1px solid
         rgba(212,175,55,.12);
 
-    color: #555;
+    color:
+        #555;
 
-    font-size: 11px;
-    letter-spacing: .5px;
+    font-size:
+        11px;
+
+    letter-spacing:
+        .5px;
 }
 
 .footer-brand {
+
     font-family:
         "Cinzel", serif;
 
@@ -1292,6 +1287,10 @@ div[data-testid="stAlert"] {
         9px;
 }
 
+/* =========================================================
+   STREAMLIT BRANDING
+========================================================= */
+
 #MainMenu {
     visibility: hidden;
 }
@@ -1304,6 +1303,10 @@ header {
     background:
         transparent !important;
 }
+
+/* =========================================================
+   MOBILE
+========================================================= */
 
 @media (max-width: 900px) {
 
@@ -1322,42 +1325,30 @@ header {
     }
 
     .premium-hero {
-        padding:
-            40px 20px;
-
-        min-height:
-            350px;
+        padding: 40px 20px;
+        min-height: 350px;
     }
 
     .hero-brand {
-        font-size:
-            31px;
-
-        letter-spacing:
-            2px;
+        font-size: 31px;
+        letter-spacing: 2px;
     }
 
     .hero-subtitle {
-        font-size:
-            11px;
-
-        letter-spacing:
-            2px;
+        font-size: 11px;
+        letter-spacing: 2px;
     }
 
     .doctor-name {
-        font-size:
-            24px;
+        font-size: 24px;
     }
 
     .feature-grid {
-        grid-template-columns:
-            1fr;
+        grid-template-columns: 1fr;
     }
 
     .risk-number {
-        font-size:
-            58px;
+        font-size: 58px;
     }
 }
 
@@ -1389,9 +1380,7 @@ st.markdown(
 st.markdown(
     """
     <div class="luxury-nav">
-        <div class="luxury-logo">
-            Dr. Omnia Ali
-        </div>
+        <div class="luxury-logo">Dr. Omnia Ali</div>
 
         <div class="luxury-nav-links">
             <span>الرئيسية</span>
@@ -1444,12 +1433,10 @@ st.markdown(
         </div>
 
         <div class="ecg-line">
-
             <svg
                 viewBox="0 0 1000 45"
                 preserveAspectRatio="none"
             >
-
                 <polyline
                     points="
                     0,23
@@ -1483,9 +1470,7 @@ st.markdown(
                     fill="none"
                     stroke-width="2"
                 />
-
             </svg>
-
         </div>
 
         <div class="system-status">
@@ -1502,7 +1487,7 @@ st.markdown(
 
 
 # =========================================================
-# FEATURE CARDS
+# FEATURES
 # =========================================================
 
 st.markdown(
@@ -1510,10 +1495,7 @@ st.markdown(
     <div class="feature-grid">
 
         <div class="feature-card">
-
-            <div class="feature-icon">
-                ♛
-            </div>
+            <div class="feature-icon">♛</div>
 
             <div class="feature-title">
                 رعاية VIP خاصة
@@ -1523,15 +1505,10 @@ st.markdown(
                 تجربة طبية متقدمة تجمع الخصوصية
                 والدقة وأحدث تقنيات الذكاء الاصطناعي.
             </div>
-
         </div>
 
-
         <div class="feature-card">
-
-            <div class="feature-icon">
-                ⚕
-            </div>
+            <div class="feature-icon">⚕</div>
 
             <div class="feature-title">
                 تشخيص ذكي
@@ -1541,15 +1518,10 @@ st.markdown(
                 تحليل متعدد الأبعاد للبيانات السريرية
                 والمؤشرات الحيوية ضمن منصة واحدة.
             </div>
-
         </div>
 
-
         <div class="feature-card">
-
-            <div class="feature-icon">
-                ✦
-            </div>
+            <div class="feature-icon">✦</div>
 
             <div class="feature-title">
                 Clinical Intelligence
@@ -1559,7 +1531,6 @@ st.markdown(
                 منصة بحثية متقدمة لدعم القرار السريري
                 وتحليل المخاطر والاتجاهات الزمنية.
             </div>
-
         </div>
 
     </div>
@@ -1654,7 +1625,8 @@ with tab1:
             min_value=30.0,
             max_value=45.0,
             value=38.9,
-            step=0.1
+            step=0.1,
+            format="%.1f"
         )
 
         rr = st.number_input(
@@ -1681,7 +1653,6 @@ with tab1:
             step=0.1
         )
 
-
     # =====================================================
     # LIVE DASHBOARD
     # =====================================================
@@ -1699,11 +1670,9 @@ with tab1:
     v1, v2, v3, v4 = st.columns(4)
 
     with v1:
-
         st.markdown(
             f"""
             <div class="vital-card">
-
                 <div class="vital-label">
                     Oxygen Saturation
                 </div>
@@ -1715,18 +1684,15 @@ with tab1:
                 <div class="vital-unit">
                     SpO₂
                 </div>
-
             </div>
             """,
             unsafe_allow_html=True
         )
 
     with v2:
-
         st.markdown(
             f"""
             <div class="vital-card">
-
                 <div class="vital-label">
                     Heart Rate
                 </div>
@@ -1738,18 +1704,15 @@ with tab1:
                 <div class="vital-unit">
                     Beats / Minute
                 </div>
-
             </div>
             """,
             unsafe_allow_html=True
         )
 
     with v3:
-
         st.markdown(
             f"""
             <div class="vital-card">
-
                 <div class="vital-label">
                     Temperature
                 </div>
@@ -1761,18 +1724,15 @@ with tab1:
                 <div class="vital-unit">
                     ° Celsius
                 </div>
-
             </div>
             """,
             unsafe_allow_html=True
         )
 
     with v4:
-
         st.markdown(
             f"""
             <div class="vital-card">
-
                 <div class="vital-label">
                     Respiratory Rate
                 </div>
@@ -1784,7 +1744,6 @@ with tab1:
                 <div class="vital-unit">
                     Breaths / Minute
                 </div>
-
             </div>
             """,
             unsafe_allow_html=True
@@ -1810,8 +1769,8 @@ with tab2:
     st.markdown(
         """
         <div class="ai-banner">
-            ◈ Temporal AI engine — tracking physiological
-            trajectory and deterioration patterns.
+            ◈ Temporal AI engine —
+            tracking physiological trajectory and deterioration patterns.
         </div>
         """,
         unsafe_allow_html=True
@@ -1859,9 +1818,9 @@ with tab2:
 
     fig = go.Figure()
 
-    # -----------------------------------------------------
-    # SpO2
-    # -----------------------------------------------------
+    # =====================================================
+    # SPO2
+    # =====================================================
 
     fig.add_trace(
         go.Scatter(
@@ -1869,24 +1828,19 @@ with tab2:
             y=mock_spo2,
             mode="lines+markers",
             name="SpO₂ (%)",
-
             line=dict(
                 color="#D4AF37",
                 width=4
             ),
-
             marker=dict(
                 size=8
-            ),
-
-            hovertemplate=
-                "SpO₂: %{y}%<extra></extra>"
+            )
         )
     )
 
-    # -----------------------------------------------------
-    # Heart Rate
-    # -----------------------------------------------------
+    # =====================================================
+    # HEART RATE
+    # =====================================================
 
     fig.add_trace(
         go.Scatter(
@@ -1894,25 +1848,20 @@ with tab2:
             y=mock_hr,
             mode="lines+markers",
             name="Heart Rate (bpm)",
-
             line=dict(
                 color="#AA7C11",
                 width=2,
                 dash="dot"
             ),
-
             marker=dict(
                 size=6
-            ),
-
-            hovertemplate=
-                "Heart Rate: %{y} bpm<extra></extra>"
+            )
         )
     )
 
-    # -----------------------------------------------------
-    # Temperature
-    # -----------------------------------------------------
+    # =====================================================
+    # TEMPERATURE
+    # =====================================================
 
     fig.add_trace(
         go.Scatter(
@@ -1921,135 +1870,93 @@ with tab2:
             mode="lines+markers",
             name="Temperature (°C)",
             yaxis="y2",
-
             line=dict(
                 color="#E7C95C",
                 width=3,
                 dash="dash"
             ),
-
             marker=dict(
                 size=6
-            ),
-
-            hovertemplate=
-                "Temperature: %{y} °C<extra></extra>"
+            )
         )
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # SAFE PLOTLY LAYOUT
-    # -----------------------------------------------------
+    # =====================================================
 
     fig.update_layout(
-
         paper_bgcolor="rgba(0,0,0,0)",
-
-        plot_bgcolor="rgba(10,10,10,0.50)",
-
+        plot_bgcolor="rgba(10,10,10,0.5)",
         font=dict(
-            color="#D9C77C",
-            family="Tajawal, Arial, sans-serif",
-            size=13
+            color="#D9C77C"
         ),
 
         margin=dict(
-            l=25,
-            r=25,
-            t=60,
-            b=35
+            l=20,
+            r=20,
+            t=50,
+            b=20
         ),
 
-        height=480,
-
-        hovermode="x unified",
-
         xaxis=dict(
-
-            title="Clinical Timeline",
-
-            gridcolor=
-                "rgba(212,175,55,0.10)",
-
             showgrid=True,
-
-            zeroline=False,
-
-            tickfont=dict(
-                color="#D9C77C"
-            ),
-
-            title_font=dict(
-                color="#D4AF37"
-            )
+            gridcolor="rgba(212,175,55,0.10)",
+            zeroline=False
         ),
 
         yaxis=dict(
-
             title="SpO₂ / Heart Rate",
-
-            gridcolor=
-                "rgba(212,175,55,0.10)",
-
             showgrid=True,
-
+            gridcolor="rgba(212,175,55,0.10)",
             zeroline=False,
-
             tickfont=dict(
-                color="#D4AF37"
-            ),
-
-            title_font=dict(
                 color="#D4AF37"
             )
         ),
 
         yaxis2=dict(
-
             title="Temperature (°C)",
-
             overlaying="y",
-
             side="right",
-
             showgrid=False,
-
             zeroline=False,
-
             tickfont=dict(
-                color="#E7C95C"
-            ),
-
-            title_font=dict(
                 color="#E7C95C"
             )
         ),
 
         legend=dict(
-
             orientation="h",
-
             yanchor="bottom",
-
             y=1.02,
-
             xanchor="right",
+            x=1
+        ),
 
-            x=1,
-
-            font=dict(
-                color="#D9C77C"
-            )
-        )
+        hovermode="x unified"
     )
 
     st.plotly_chart(
         fig,
-        use_container_width=True,
-        config={
-            "displayModeBar": False,
-            "responsive": True
-        }
+        use_container_width=True
+    )
+
+    st.markdown(
+        """
+        <div class="glass-card">
+            <h3 style="color:#D4AF37;">
+                Temporal Intelligence
+            </h3>
+
+            <p style="color:#aaa; line-height:1.8;">
+                The visualization displays a simulated longitudinal
+                trajectory based on the current patient parameters.
+                It is intended for research and interface demonstration.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 
@@ -2073,7 +1980,7 @@ with tab3:
         """
         <div class="ai-banner">
             ✦ Computer Vision Diagnostic Engine —
-            Upload X-Rays or Scans for clinical evaluation.
+            Upload X-Rays or scans for research-interface evaluation.
         </div>
         """,
         unsafe_allow_html=True
@@ -2085,8 +1992,6 @@ with tab3:
             "jpg",
             "jpeg",
             "png",
-            "webp",
-            "bmp",
             "dcm",
             "dicom"
         ]
@@ -2094,41 +1999,11 @@ with tab3:
 
     if uploaded_file is not None:
 
-        file_name = uploaded_file.name.lower()
-
-        is_dicom = (
-            file_name.endswith(".dcm")
-            or file_name.endswith(".dicom")
+        col_img, col_diag = st.columns(
+            [1, 1]
         )
 
-        if is_dicom:
-
-            st.warning(
-                "DICOM file detected. Native DICOM pixel decoding "
-                "requires the optional pydicom package. "
-                "The application will not crash."
-            )
-
-            st.markdown(
-                """
-                <div class="glass-card">
-
-                    <h3 style="color:#D4AF37;">
-                        DICOM File Received
-                    </h3>
-
-                    <p style="color:#ccc;">
-                        File uploaded successfully and is ready
-                        for integration with a DICOM-compatible
-                        imaging pipeline.
-                    </p>
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-        else:
+        with col_img:
 
             try:
 
@@ -2138,75 +2013,61 @@ with tab3:
                     io.BytesIO(image_bytes)
                 )
 
-                image = image.convert("RGB")
-
-                col_img, col_diag = st.columns(
-                    [1, 1]
+                st.image(
+                    image,
+                    caption="Uploaded Clinical Image",
+                    use_container_width=True
                 )
 
-                with col_img:
+            except Exception:
 
-                    st.image(
-                        image,
-                        caption="Uploaded Clinical Image",
-                        use_container_width=True
-                    )
-
-                with col_diag:
-
-                    st.markdown(
-                        """
-                        <div class="glass-card">
-
-                            <h3 style="color:#D4AF37; margin-top:0;">
-                                AI Imaging Diagnostics
-                            </h3>
-
-                            <p style="color:#ccc; font-size:14px;">
-                                <strong>File Status:</strong>
-                                Image successfully loaded
-                            </p>
-
-                            <p style="color:#ccc; font-size:14px;">
-                                <strong>Target Region:</strong>
-                                Thoracic Cavity / Pulmonary Field
-                            </p>
-
-                            <p style="color:#ccc; font-size:14px;">
-                                <strong>Analysis Mode:</strong>
-                                Computer Vision Research Pipeline
-                            </p>
-
-                            <p style="color:#ccc; font-size:14px;">
-                                <strong>Status:</strong>
-                                Ready for model inference
-                            </p>
-
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-                    if st.button(
-                        "GENERATE DIAGNOSTIC REPORT",
-                        key="generate_report"
-                    ):
-
-                        st.info(
-                            "Imaging report generation is currently "
-                            "a demonstration interface. No diagnostic "
-                            "finding is generated without a validated "
-                            "medical imaging model."
-                        )
-
-            except Exception as image_error:
-
-                st.error(
-                    "The uploaded image could not be decoded safely."
+                st.warning(
+                    "The uploaded file could not be displayed as a standard image."
                 )
 
-                st.caption(
-                    f"Technical information: {type(image_error).__name__}"
+        with col_diag:
+
+            st.markdown(
+                """
+                <div class="glass-card">
+
+                    <h3 style="color:#D4AF37; margin-top:0;">
+                        AI Imaging Diagnostics
+                    </h3>
+
+                    <p style="color:#ccc; font-size:14px;">
+                        <strong>Analysis Mode:</strong>
+                        Research Interface
+                    </p>
+
+                    <p style="color:#ccc; font-size:14px;">
+                        <strong>Target Region:</strong>
+                        Thoracic Cavity / Pulmonary Field
+                    </p>
+
+                    <p style="color:#ccc; font-size:14px;">
+                        <strong>Status:</strong>
+                        Image received successfully.
+                    </p>
+
+                    <p style="color:#aaa; font-size:13px; line-height:1.8;">
+                        Automated diagnostic findings require a validated
+                        medical imaging model. This interface does not
+                        independently establish a clinical diagnosis.
+                    </p>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            if st.button(
+                "GENERATE DIAGNOSTIC REPORT",
+                key="generate_report"
+            ):
+
+                st.info(
+                    "Diagnostic report generation is available when a validated imaging model is connected."
                 )
 
 
@@ -2229,34 +2090,23 @@ with tab4:
     st.markdown(
         """
         <div class="ai-banner">
-            ✦ Clinical risk engine — evaluates entered physiological
-            and laboratory parameters for demonstration purposes.
+            ✦ Clinical risk engine ready —
+            evaluate the supplied parameters using the connected model.
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        """
-        <div class="glass-card">
+    if not CLINICAL_MODEL_AVAILABLE:
 
-            <p style="color:#aaa; margin:0;">
-                This demonstration score is not a medical diagnosis.
-                Clinical decisions must be made by qualified healthcare
-                professionals using validated clinical protocols.
-            </p>
+        st.warning(
+            "clinical_model.py was not loaded. The application is using a safe demonstration scoring engine."
+        )
 
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    run_assessment = st.button(
+    if st.button(
         "RUN CLINICAL RISK ASSESSMENT",
-        key="run_risk_assessment"
-    )
-
-    if run_assessment:
+        key="risk_assessment_button"
+    ):
 
         inputs = {
             "age": age,
@@ -2271,9 +2121,46 @@ with tab4:
 
         try:
 
-            risk_score, risk_level, recommendations = (
-                clinical_risk_assessment(inputs)
+            result = clinical_risk_assessment(
+                inputs
             )
+
+            if (
+                isinstance(result, tuple)
+                and len(result) == 3
+            ):
+
+                risk_score = result[0]
+                risk_level = result[1]
+                recommendations = result[2]
+
+            else:
+
+                raise ValueError(
+                    "clinical_risk_assessment must return three values."
+                )
+
+            try:
+                risk_score = float(risk_score)
+            except Exception:
+                risk_score = 0.0
+
+            risk_score = max(
+                0,
+                min(
+                    100,
+                    round(risk_score, 1)
+                )
+            )
+
+            if not isinstance(
+                recommendations,
+                (list, tuple)
+            ):
+
+                recommendations = [
+                    str(recommendations)
+                ]
 
             r_col1, r_col2 = st.columns(
                 [1, 2]
@@ -2286,11 +2173,11 @@ with tab4:
                     <div class="risk-panel">
 
                         <div class="risk-number">
-                            {risk_score}%
+                            {risk_score:g}%
                         </div>
 
                         <div class="risk-label">
-                            {risk_level} RISK
+                            {str(risk_level).upper()} RISK
                         </div>
 
                     </div>
@@ -2300,20 +2187,14 @@ with tab4:
 
             with r_col2:
 
-                recs_html = ""
+                safe_items = ""
 
                 for rec in recommendations:
 
-                    safe_rec = str(rec).replace(
-                        "<",
-                        "&lt;"
-                    ).replace(
-                        ">",
-                        "&gt;"
-                    )
-
-                    recs_html += (
-                        f"<li>{safe_rec}</li>"
+                    safe_items += (
+                        "<li>"
+                        + str(rec)
+                        + "</li>"
                     )
 
                 st.markdown(
@@ -2329,7 +2210,7 @@ with tab4:
                             line-height:1.9;
                             padding-right:25px;
                         ">
-                            {recs_html}
+                            {safe_items}
                         </ul>
 
                     </div>
@@ -2337,15 +2218,18 @@ with tab4:
                     unsafe_allow_html=True
                 )
 
-        except Exception as risk_error:
-
-            st.error(
-                "The clinical risk engine encountered an unexpected error."
+            st.caption(
+                "This score is a decision-support/research output and should not replace professional medical judgment."
             )
 
-            st.caption(
-                f"Technical information: "
-                f"{type(risk_error).__name__}"
+        except Exception as error:
+
+            st.error(
+                "The clinical risk engine could not complete the calculation."
+            )
+
+            st.code(
+                str(error)
             )
 
 
@@ -2366,7 +2250,10 @@ st.markdown(
             • Dr. Omnia Ali
         </div>
 
-        <div style="margin-top:5px; color:#444;">
+        <div style="
+            margin-top:5px;
+            color:#444;
+        ">
             © 2026 All Rights Reserved
         </div>
 
@@ -2374,4 +2261,3 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-```
