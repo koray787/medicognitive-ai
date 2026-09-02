@@ -30,7 +30,6 @@ st.markdown("""
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
-
 /* =========================================================
    ROOT
 ========================================================= */
@@ -1506,28 +1505,40 @@ header {
 # BACKGROUND
 # =========================================================
 
-st.markdown('<div class="gold-background"><div class="gold-orb one"></div><div class="gold-orb two"></div></div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="gold-background"><div class="gold-orb one"></div><div class="gold-orb two"></div></div>',
+    unsafe_allow_html=True
+)
 
 
 # =========================================================
 # LUXURY NAVBAR
 # =========================================================
 
-st.markdown('<div class="luxury-nav"><div class="luxury-logo">Dr. Omnea Ali</div><div class="luxury-nav-links"><span>الرئيسية</span><span>عن الدكتورة</span><span>الخدمات الطبية</span><span>الذكاء الاصطناعي</span></div><div class="vip-badge">✦ VIP MEDICAL AI</div></div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="luxury-nav"><div class="luxury-logo">Dr. Omnea Ali</div><div class="luxury-nav-links"><span>الرئيسية</span><span>عن الدكتورة</span><span>الخدمات الطبية</span><span>الذكاء الاصطناعي</span></div><div class="vip-badge">✦ VIP MEDICAL AI</div></div>',
+    unsafe_allow_html=True
+)
 
 
 # =========================================================
 # PREMIUM HERO
 # =========================================================
 
-st.markdown('''<div class="premium-hero"><div class="hero-medical-symbol">🩺</div><div class="hero-subtitle">رعاية طبية بمقاييس عالمية</div><div class="hero-brand">MEDICOGNITIVE AI</div><div class="hero-description">MULTIMODAL CLINICAL INTELLIGENCE • EARLY WARNING • AI RESEARCH PLATFORM</div><div class="doctor-name">الدكتورة أمنية علي</div><div class="doctor-title">MEDICAL AI RESEARCH & CLINICAL INTELLIGENCE</div><div class="ecg-line"><svg viewBox="0 0 1000 45" preserveAspectRatio="none"><polyline points="0,23 100,23 125,23 140,10 150,37 165,23 300,23 330,23 350,6 360,40 375,23 500,23 530,23 550,12 560,35 575,23 700,23 730,23 750,8 760,38 775,23 900,23 930,23 950,10 960,37 975,23 1000,23" fill="none" stroke-width="2"/></svg></div><div class="system-status"><span class="status-dot"></span> AI SYSTEM ONLINE &nbsp; • &nbsp; CLINICAL ENGINE ACTIVE</div></div>''', unsafe_allow_html=True)
+st.markdown(
+    '''<div class="premium-hero"><div class="hero-medical-symbol">🩺</div><div class="hero-subtitle">رعاية طبية بمقاييس عالمية</div><div class="hero-brand">MEDICOGNITIVE AI</div><div class="hero-description">MULTIMODAL CLINICAL INTELLIGENCE • EARLY WARNING • AI RESEARCH PLATFORM</div><div class="doctor-name">الدكتورة أمنية علي</div><div class="doctor-title">MEDICAL AI RESEARCH & CLINICAL INTELLIGENCE</div><div class="ecg-line"><svg viewBox="0 0 1000 45" preserveAspectRatio="none"><polyline points="0,23 100,23 125,23 140,10 150,37 165,23 300,23 330,23 350,6 360,40 375,23 500,23 530,23 550,12 560,35 575,23 700,23 730,23 750,8 760,38 775,23 900,23 930,23 950,10 960,37 975,23 1000,23" fill="none" stroke-width="2"/></svg></div><div class="system-status"><span class="status-dot"></span> AI SYSTEM ONLINE &nbsp; • &nbsp; CLINICAL ENGINE ACTIVE</div></div>''',
+    unsafe_allow_html=True
+)
 
 
 # =========================================================
 # PREMIUM FEATURES
 # =========================================================
 
-st.markdown('<div class="feature-grid"><div class="feature-card"><div class="feature-icon">♛</div><div class="feature-title">رعاية VIP خاصة</div><div class="feature-text">تجربة طبية متقدمة تجمع الخصوصية والدقة وأحدث تقنيات الذكاء الاصطناعي.</div></div><div class="feature-card"><div class="feature-icon">⚕</div><div class="feature-title">تشخيص ذكي</div><div class="feature-text">تحليل متعدد الأبعاد للبيانات السريرية والمؤشرات الحيوية ضمن منصة واحدة.</div></div><div class="feature-card"><div class="feature-icon">✦</div><div class="feature-title">Clinical Intelligence</div><div class="feature-text">منصة بحثية متقدمة لدعم القرار السريري وتحليل المخاطر والاتجاهات الزمنية.</div></div></div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="feature-grid"><div class="feature-card"><div class="feature-icon">♛</div><div class="feature-title">رعاية VIP خاصة</div><div class="feature-text">تجربة طبية متقدمة تجمع الخصوصية والدقة وأحدث تقنيات الذكاء الاصطناعي.</div></div><div class="feature-card"><div class="feature-icon">⚕</div><div class="feature-title">تشخيص ذكي</div><div class="feature-text">تحليل متعدد الأبعاد للبيانات السريرية والمؤشرات الحيوية ضمن منصة واحدة.</div></div><div class="feature-card"><div class="feature-icon">✦</div><div class="feature-title">Clinical Intelligence</div><div class="feature-text">منصة بحثية متقدمة لدعم القرار السريري وتحليل المخاطر والاتجاهات الزمنية.</div></div></div>',
+    unsafe_allow_html=True
+)
 
 
 # =========================================================
@@ -1548,9 +1559,15 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 with tab1:
 
-    st.markdown('<div class="section-heading"><span>01</span> 👤 Patient Clinical Profile</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-heading"><span>01</span> 👤 Patient Clinical Profile</div>',
+        unsafe_allow_html=True
+    )
 
-    st.markdown('<div class="ai-banner">✦ Clinical intelligence interface ready — enter patient parameters to activate analysis.</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ai-banner">✦ Clinical intelligence interface ready — enter patient parameters to activate analysis.</div>',
+        unsafe_allow_html=True
+    )
 
     patient_id = st.text_input(
         "Patient Identification Number",
@@ -1624,36 +1641,57 @@ with tab1:
     # LIVE DASHBOARD
     # =====================================================
 
-    st.markdown('<div class="section-heading"><span>LIVE</span> 📡 Live Clinical Parameters</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-heading"><span>LIVE</span> 📡 Live Clinical Parameters</div>',
+        unsafe_allow_html=True
+    )
 
     v1, v2, v3, v4 = st.columns(4)
 
     with v1:
 
-        st.markdown(f'<div class="vital-card"><div class="vital-label">Oxygen Saturation</div><div class="vital-value">{spo2}%</div><div class="vital-unit">SpO₂</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="vital-card"><div class="vital-label">Oxygen Saturation</div><div class="vital-value">{spo2}%</div><div class="vital-unit">SpO₂</div></div>',
+            unsafe_allow_html=True
+        )
 
     with v2:
 
-        st.markdown(f'<div class="vital-card"><div class="vital-label">Heart Rate</div><div class="vital-value">{hr}</div><div class="vital-unit">Beats / Minute</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="vital-card"><div class="vital-label">Heart Rate</div><div class="vital-value">{hr}</div><div class="vital-unit">Beats / Minute</div></div>',
+            unsafe_allow_html=True
+        )
 
     with v3:
 
-        st.markdown(f'<div class="vital-card"><div class="vital-label">Temperature</div><div class="vital-value">{temp}</div><div class="vital-unit">° Celsius</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="vital-card"><div class="vital-label">Temperature</div><div class="vital-value">{temp}</div><div class="vital-unit">° Celsius</div></div>',
+            unsafe_allow_html=True
+        )
 
     with v4:
 
-        st.markdown(f'<div class="vital-card"><div class="vital-label">Respiratory Rate</div><div class="vital-value">{rr}</div><div class="vital-unit">Breaths / Minute</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="vital-card"><div class="vital-label">Respiratory Rate</div><div class="vital-value">{rr}</div><div class="vital-unit">Breaths / Minute</div></div>',
+            unsafe_allow_html=True
+        )
 
 
 # =========================================================
-# TAB 2 — TRENDS (COMPATIBLE PLOTLY LAYOUT)
+# TAB 2 — TRENDS
 # =========================================================
 
 with tab2:
 
-    st.markdown('<div class="section-heading"><span>02</span> 📈 Longitudinal Clinical Intelligence</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-heading"><span>02</span> 📈 Longitudinal Clinical Intelligence</div>',
+        unsafe_allow_html=True
+    )
 
-    st.markdown('<div class="ai-banner">◈ Temporal AI engine — tracking physiological trajectory and deterioration patterns.</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ai-banner">◈ Temporal AI engine — tracking physiological trajectory and deterioration patterns.</div>',
+        unsafe_allow_html=True
+    )
 
     dates = [
         datetime.now() - timedelta(days=i)
@@ -1695,7 +1733,7 @@ with tab2:
         )
     )
 
-    # Temperature (y-axis 2)
+    # Temperature
     fig.add_trace(
         go.Scatter(
             x=dates_str,
@@ -1708,7 +1746,6 @@ with tab2:
         )
     )
 
-    # Layout update fully safe for Python 3.14 / Plotly 5+
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(10,10,10,0.5)",
@@ -1719,12 +1756,18 @@ with tab2:
             showgrid=True
         ),
         yaxis=dict(
-            title=dict(text="SpO₂ / Heart Rate", font=dict(color="#D4AF37")),
+            title=dict(
+                text="SpO₂ / Heart Rate",
+                font=dict(color="#D4AF37")
+            ),
             gridcolor="rgba(212,175,55,0.1)",
             tickfont=dict(color="#D4AF37")
         ),
         yaxis2=dict(
-            title=dict(text="Temp (°C)", font=dict(color="#E7C95C")),
+            title=dict(
+                text="Temp (°C)",
+                font=dict(color="#E7C95C")
+            ),
             overlaying="y",
             side="right",
             gridcolor="rgba(212,175,55,0.05)",
@@ -1741,18 +1784,40 @@ with tab2:
 
 with tab3:
 
-    st.markdown('<div class="section-heading"><span>03</span> 👁️ AI Vision & Diagnostic Imaging</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-heading"><span>03</span> 👁️ AI Vision & Diagnostic Imaging</div>',
+        unsafe_allow_html=True
+    )
 
-    st.markdown('<div class="ai-banner">✦ Deep learning visual engine for chest radiograph analysis.</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ai-banner">✦ Deep learning visual engine for chest radiograph analysis.</div>',
+        unsafe_allow_html=True
+    )
 
-    uploaded_file = st.file_uploader("Upload Medical Image (X-Ray / CT)", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader(
+        "Upload Medical Image (X-Ray / CT)",
+        type=["jpg", "jpeg", "png"]
+    )
 
     if uploaded_file is not None:
+
         image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Clinical Image", use_column_width=True)
-        st.success("Image successfully processed by AI engine.")
+
+        st.image(
+            image,
+            caption="Uploaded Clinical Image",
+            use_container_width=True
+        )
+
+        st.success(
+            "Image successfully processed by AI engine."
+        )
+
     else:
-        st.info("Awaiting medical image upload for automated analysis.")
+
+        st.info(
+            "Awaiting medical image upload for automated analysis."
+        )
 
 
 # =========================================================
@@ -1761,35 +1826,157 @@ with tab3:
 
 with tab4:
 
-    st.markdown('<div class="section-heading"><span>04</span> 🧠 AI Risk Intelligence & Clinical Assessment</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-heading"><span>04</span> 🧠 AI Risk Intelligence & Clinical Assessment</div>',
+        unsafe_allow_html=True
+    )
 
-    st.markdown('<div class="ai-banner">✦ Multi-parametric predictive modeling for patient deterioration risk.</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ai-banner">✦ Multi-parametric predictive modeling for patient deterioration risk.</div>',
+        unsafe_allow_html=True
+    )
 
     if st.button("RUN CLINICAL RISK ASSESSMENT"):
-        risk_score = clinical_risk_assessment(age, sex, spo2, hr, temp, rr, crp, wbc)
 
-        st.markdown(f'''
-        <div class="risk-panel">
-            <div class="risk-number">{risk_score}%</div>
-            <div class="risk-label">PREDICTED CLINICAL RISK SCORE</div>
-        </div>
-        ''', unsafe_allow_html=True)
+        # -------------------------------------------------
+        # RUN MODEL
+        # -------------------------------------------------
+
+        raw_risk_score = clinical_risk_assessment(
+            age,
+            sex,
+            spo2,
+            hr,
+            temp,
+            rr,
+            crp,
+            wbc
+        )
+
+        # -------------------------------------------------
+        # SAFE NORMALIZATION
+        # Handles:
+        # int / float / numpy numbers / strings /
+        # arrays with one value
+        # -------------------------------------------------
+
+        try:
+
+            if isinstance(raw_risk_score, dict):
+
+                possible_keys = [
+                    "risk_score",
+                    "score",
+                    "risk",
+                    "probability",
+                    "prediction"
+                ]
+
+                extracted_score = None
+
+                for key in possible_keys:
+                    if key in raw_risk_score:
+                        extracted_score = raw_risk_score[key]
+                        break
+
+                if extracted_score is None:
+                    raise ValueError(
+                        "Clinical model returned a dictionary without a recognized risk score key."
+                    )
+
+                raw_risk_score = extracted_score
+
+            elif isinstance(raw_risk_score, (list, tuple)):
+
+                if len(raw_risk_score) == 0:
+                    raise ValueError(
+                        "Clinical model returned an empty result."
+                    )
+
+                raw_risk_score = raw_risk_score[0]
+
+            elif isinstance(raw_risk_score, np.ndarray):
+
+                if raw_risk_score.size == 0:
+                    raise ValueError(
+                        "Clinical model returned an empty array."
+                    )
+
+                raw_risk_score = raw_risk_score.reshape(-1)[0]
+
+            elif hasattr(raw_risk_score, "item"):
+
+                raw_risk_score = raw_risk_score.item()
+
+            risk_score = float(raw_risk_score)
+
+            # If the model returns probability between 0 and 1,
+            # convert it to percentage.
+            if 0 <= risk_score <= 1:
+                risk_score = risk_score * 100
+
+            # Keep the score inside the displayed percentage range.
+            risk_score = max(0.0, min(100.0, risk_score))
+
+        except (TypeError, ValueError, OverflowError) as e:
+
+            st.error(
+                "Clinical risk model returned an invalid risk score."
+            )
+
+            st.code(
+                str(e)
+            )
+
+            st.stop()
+
+        # -------------------------------------------------
+        # DISPLAY RISK
+        # -------------------------------------------------
+
+        st.markdown(
+            f'''
+            <div class="risk-panel">
+                <div class="risk-number">{risk_score:.1f}%</div>
+                <div class="risk-label">PREDICTED CLINICAL RISK SCORE</div>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+        # -------------------------------------------------
+        # RISK CLASSIFICATION
+        # -------------------------------------------------
 
         if risk_score > 70:
-            st.error("HIGH RISK: Immediate clinical attention recommended.")
+
+            st.error(
+                "HIGH RISK: Immediate clinical attention recommended."
+            )
+
         elif risk_score > 40:
-            st.warning("MODERATE RISK: Enhanced physiological monitoring advised.")
+
+            st.warning(
+                "MODERATE RISK: Enhanced physiological monitoring advised."
+            )
+
         else:
-            st.success("LOW RISK: Patient vital metrics within stable parameters.")
+
+            st.success(
+                "LOW RISK: Patient vital metrics within stable parameters."
+            )
 
 
 # =========================================================
 # FOOTER
 # =========================================================
 
-st.markdown('''
-<div class="premium-footer">
-    <div class="footer-brand">MEDICOGNITIVE AI</div>
-    <div>Developed for Dr. Omnia Ali • Clinical Decision Support System</div>
-</div>
-''', unsafe_allow_html=True)
+st.markdown(
+    '''
+    <div class="premium-footer">
+        <div class="footer-brand">MEDICOGNITIVE AI</div>
+        <div>Developed for Dr. Omnia Ali • Clinical Decision Support System</div>
+    </div>
+    ''',
+    unsafe_allow_html=True
+)
