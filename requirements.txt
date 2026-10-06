@@ -5,3 +5,5 @@ plotly
 Pillow
 matplotlib
 scikit-learn
+streamlit>=1.40.0
+requests>=2.32.0
